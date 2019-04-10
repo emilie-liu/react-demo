@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>React.demo</title>
+    <link rel="stylesheet/less" type="text/css" href="../css/style.less">
+    <!--less预处理js的引用-->
+    <script src="../build/less.min.js" type="text/javascript"></script>
+    <script src="../build/react.development.js"></script>
+    <script src="../build/react-dom.development.js"></script>
+    <script src="../build/babel.min.js"></script>
+    <script src="../build/prop-types.js"></script>
+    <script src="../build/jquery.min.js"></script>
+</head>
+<body>
+<div class="example" id="example1"></div>
+<div class="example" id="example2"></div>
+<div class="example" id="example3"></div>
+<div class="example" id="example4"></div>
+<div class="example" id="example5"></div>
+<div class="example" id="example6"></div>
+<div class="example" id="example7"></div>
+<div class="example" id="example8"></div>
+<div class="example" id="example9"></div>
+<div class="example" id="example10"></div>
+<div class="example" id="example11"></div>
+<div class="example" id="example12"></div>
+<script type="text/babel">
+    ReactDOM.render(
+        //hello world的demo
+        <h1>hello, world!!!</h1>,
+        document.getElementById('example1')
+    );
+
+    let names = ["小明", "小黑", "小红"];
+    ReactDOM.render(
+        //    数组循环的demo
+        <ul>
+            {
+                names.map(function (name) {
+                    return <li>hello, {name}!</li>
+                })
+            }
+        </ul>,
+        document.getElementById('example2')
+    );
+
+    let arr = [
+        <h1>数组标签1</h1>,
+        <h2>数组标签2</h2>,
+    ];
+    ReactDOM.render(
+        //    元素标签在数组中,引用arr数组
+        <div>{arr}</div>,
+        document.getElementById('example3')
+    );
+
+    /*let HelloComponent = React.createClass({
+        render: function () {
+            return <h1>hello, {this.props.name}</h1>
+        }
+    });*/
+    //组件引用
+    class HelloComponent extends React.Component {
+        render() {
+            return <h1>hello,{this.props.name} <span>你好！</span></h1>
+        }
+    }
+
+    ReactDOM.render(
+        <HelloComponent name="john"/>,
+        document.getElementById('example4')
+    );
+
+    //this.props.children组件不止一个子节点
+    class NotList extends React.Component {
+        render() {
+            return (
+                <ol>
+                    {
+                        React.Children.map(this.props.children, function (child) {
+                            return <li>{child}</li>
+                        })
+                    }
+                </ol>
+            );
+        }
+    }
+
+    ReactDOM.render(
+        <NotList><span>第一个children</span><span>第二个children</span></NotList>,
+        document.getElementById('example5')
+    );
+
+    //    PropTypes验证组件实例的属性是否符合要求
+    let data = 123;
+
+    class MyTitle extends React.Component {
+        static propTypes = {
+            title: PropTypes.string.isRequired,
+        }
+
+        render() {
+            return <h1> {this.props.title}///proptypes属性验证 </h1>;
+        }
+    }
+
+    ReactDOM.render(
+        <MyTitle title={data}/>,
+        document.getElementById('example6')
+    );
+
+
+    // 获取真是节点，绑定事件
+    class MyComponent extends React.Component {
+        //获取真是节点，并和事件做关联
+        constructor(props) {
+            super(props);
+            this.myTextInput = React.createRef();
+            this.handleClick = this.handleClick.bind(this);
+        }
+
+        //事件
+        handleClick() {
+            this.myTextInput.current.focus();
+        }
+
+        //组件
+        render() {
+            return (
+                <div>
+                    <input type="text" ref={this.myTextInput}/>
+                    <input type="button" value="input获取焦点" onClick={this.handleClick}/>
+                </div>
+            );
+        }
+    }
+
+    ReactDOM.render(
+        <MyComponent/>,
+        document.getElementById('example8')
+    );
+
+    //    this.state组件与用户之间的互动
+    class LikeButton extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                liked: false
+            };
+            this.handleClick = this.handleClick.bind(this);
+        }
+
+        handleClick(evnet) {
+            this.setState({liked: !this.state.liked})
+        }
+
+        render() {
+            //三元表达式
+            let text = this.state.liked ? 'like' : 'haven\'t liked';
+            return (
+                <span onClick={this.handleClick}>you {text} this.Click to toggle</span>
+            )
+        }
+    }
+
+    ReactDOM.render(
+        <LikeButton></LikeButton>,
+        document.getElementById('example9')
+    );
+
+    class Input extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {value: 'hello!'};
+            this.handleChange = this.handleChange.bind(this)
+        }
+
+        handleChange(event) {
+            this.setState({value: event.target.value})
+        }
+
+        render() {
+            let value = this.state.value;
+            return (
+                <div>
+                    <input onChange={this.handleChange} type="text" value={value}/>
+                    <h4>input的输入内容:{value}</h4>
+                </div>
+            )
+        }
+    }
+
+    ReactDOM.render(
+        <Input/>,
+        document.getElementById('example10')
+    );
+
+    class Hello extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {
+                opacity: 1.0
+            };
+        }
+        //箭头函数
+        componentDidMount = () => {
+            //定时器
+            this.timer = setInterval(function () {
+                let opacity = this.state.opacity;
+                opacity -= 0.3;
+                if (opacity < 0.1) {
+                    opacity = 1.0;
+                }
+                this.setState({opacity: opacity});
+            }.bind(this), 200);
+        };
+
+        render() {
+            return (
+                <div style={{opacity:this.state.opacity}}>hello {this.props.name}</div>
+            );
+        }
+    }
+    ReactDOM.render(
+        <Hello name="world"/>,
+        document.getElementById('example11')
+    );
+
+    class UserList extends React.Component{
+        constructor(props){
+            super(props);
+            this.state = {
+                username: '',
+                url: ''
+            };
+        }
+        componentDidMount(){
+            $.get(this.props.source,function (reasult) {
+                let lastGist = reasult[0];
+                console.log(lastGist);
+                    this.setState({
+                        username: lastGist.owner.login,
+                        url: lastGist.html_url
+                    })
+            }.bind(this));
+        }
+        render(){
+            return (
+                <div>点击发送ajax请求:{this.state.username}<a href={this.state.url}>ajax地址</a></div>
+            )
+        }
+    }
+    ReactDOM.render(
+        <UserList source="https://api.github.com/users/octocat/gists" />,
+        document.getElementById('example12')
+    );
+
+</script>
+</body>
+</html>
