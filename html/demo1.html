@@ -19,12 +19,12 @@
 <div class="example" id="example4"></div>
 <div class="example" id="example5"></div>
 <div class="example" id="example6"></div>
-<div class="example" id="example7"></div>
 <div class="example" id="example8"></div>
 <div class="example" id="example9"></div>
 <div class="example" id="example10"></div>
 <div class="example" id="example11"></div>
 <div class="example" id="example12"></div>
+<div class="example" id="example13"></div>
 <script type="text/babel">
     ReactDOM.render(
         //hello world的demo
@@ -169,6 +169,7 @@
         document.getElementById('example9')
     );
 
+    //表单   用户与组件之间的互动
     class Input extends React.Component {
         constructor(props) {
             super(props);
@@ -196,6 +197,8 @@
         document.getElementById('example10')
     );
 
+
+    //组件生命周期   通过函数设置定时器
     class Hello extends React.Component {
         constructor(props) {
             super(props);
@@ -227,6 +230,7 @@
         document.getElementById('example11')
     );
 
+    //ajax请求从服务器获取
     class UserList extends React.Component{
         constructor(props){
             super(props);
@@ -235,13 +239,13 @@
                 url: ''
             };
         }
+        //componentDidMount方法设置ajax请求
         componentDidMount(){
             $.get(this.props.source,function (reasult) {
                 let lastGist = reasult[0];
-                console.log(lastGist);
                     this.setState({
                         username: lastGist.owner.login,
-                        url: lastGist.html_url
+                        url: lastGist.owner.html_url
                     })
             }.bind(this));
         }
@@ -254,6 +258,49 @@
     ReactDOM.render(
         <UserList source="https://api.github.com/users/octocat/gists" />,
         document.getElementById('example12')
+    );
+
+    //根据数据url请求数据，将Promise作为对象属性，传给组件PepList
+    class RepList extends React.Component{
+        constructor(props){
+            super(props);
+            this.state ={
+                loading:true,
+                error: null,
+                data:null
+            };
+        }
+        componentDidMount(){
+            this.props.promise.then(
+                value => this.setState({loading:false,data:value}),
+                error => this.setState({loading:false,date:error})
+            );
+        }
+        render(){
+            if(this.state.loading){
+                return <span>正在加载中......</span>
+            }else if(this.state.error !== null){
+                return <span>Error是:{this.state.error.message}</span>
+            }else{
+                let repos = this.state.data.items;
+                let repoList = repos.map(function (repo) {
+                    console.log(repo);
+                    return (
+                        <li><a href={repo.html_url}>{repo.name}</a>浏览量：{repo.stargazers_count}</li>
+                    )
+                });
+                return (
+                    <main>
+                        <h3>最受欢应的project in GitHub</h3>
+                        <ol>{repoList}</ol>
+                    </main>
+                )
+            }
+        }
+    }
+    ReactDOM.render(
+        <RepList promise={$.getJSON('https://api.github.com/search/repositories?q=javascript&sort=stars')} />,
+        document.getElementById('example13')
     );
 
 </script>
